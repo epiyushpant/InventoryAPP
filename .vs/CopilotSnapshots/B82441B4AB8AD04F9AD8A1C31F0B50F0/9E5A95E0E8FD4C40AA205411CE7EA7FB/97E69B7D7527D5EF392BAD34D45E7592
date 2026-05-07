@@ -1,0 +1,72 @@
+﻿using Inventory.Models;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+
+namespace Inventory.Data
+{
+    public class PurchaseOrderDetailRepository
+    {
+        private readonly ApplicationDbContext _context;
+
+        public PurchaseOrderDetailRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<PurchaseOrderDetail>> GetAllAsync()
+        {
+            return await _context.PurchaseOrderDetails
+                .FromSqlRaw("EXEC dbo.spGetPurchaseOrderDetails")
+                .ToListAsync();
+        }
+
+        public async Task<PurchaseOrderDetail?> GetByIdAsync(int id)
+        {
+            var param = new SqlParameter("@PODetailID", id);
+            return await _context.PurchaseOrderDetails
+                .FromSqlRaw("EXEC dbo.spGetPurchaseOrderDetails @PODetailID", param)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CreateAsync(PurchaseOrderDetail detail)
+        {
+            var poParam = new SqlParameter("@PurchaseOrderID", detail.PurchaseOrderID ?? (object)DBNull.Value);
+            var productParam = new SqlParameter("@ProductID", detail.ProductID ?? (object)DBNull.Value);
+            var quantityParam = new SqlParameter("@Quantity", detail.Quantity);
+            var costParam = new SqlParameter("@UnitCost", detail.UnitCost);
+            var idParam = new SqlParameter
+            {
+                ParameterName = "@PODetailID",
+                SqlDbType = System.Data.SqlDbType.Int,
+                Direction = System.Data.ParameterDirection.Output
+            };
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spInsertPurchaseOrderDetail @PurchaseOrderID, @ProductID, @Quantity, @UnitCost",
+                poParam, productParam, quantityParam, costParam, idParam);
+
+            return (int?)idParam.Value ?? 0;
+        }
+
+        public async Task UpdateAsync(PurchaseOrderDetail detail)
+        {
+            var idParam = new SqlParameter("@PODetailID", detail.PODetailID);
+            var poParam = new SqlParameter("@PurchaseOrderID", detail.PurchaseOrderID ?? (object)DBNull.Value);
+            var productParam = new SqlParameter("@ProductID", detail.ProductID ?? (object)DBNull.Value);
+            var quantityParam = new SqlParameter("@Quantity", detail.Quantity);
+            var costParam = new SqlParameter("@UnitCost", detail.UnitCost);
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spUpdatePurchaseOrderDetail @PODetailID, @PurchaseOrderID, @ProductID, @Quantity, @UnitCost",
+                idParam, poParam, productParam, quantityParam, costParam);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var idParam = new SqlParameter("@PODetailID", id);
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spDeletePurchaseOrderDetail @PODetailID", idParam);
+        }
+    }
+}

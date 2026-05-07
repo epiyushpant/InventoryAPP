@@ -1,0 +1,72 @@
+﻿using Inventory.Models;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+
+namespace Inventory.Data
+{
+    public class SaleRepository
+    {
+        private readonly ApplicationDbContext _context;
+
+        public SaleRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<Sale>> GetAllAsync()
+        {
+            return await _context.Sales
+                .FromSqlRaw("EXEC dbo.spGetSales")
+                .ToListAsync();
+        }
+
+        public async Task<Sale?> GetByIdAsync(int id)
+        {
+            var param = new SqlParameter("@SaleID", id);
+            return await _context.Sales
+                .FromSqlRaw("EXEC dbo.spGetSales @SaleID", param)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CreateAsync(Sale sale)
+        {
+            var dateParam = new SqlParameter("@SaleDate", sale.SaleDate);
+            var customerParam = new SqlParameter("@CustomerName", sale.CustomerName ?? (object)DBNull.Value);
+            var amountParam = new SqlParameter("@TotalAmount", sale.TotalAmount ?? (object)DBNull.Value);
+            var statusParam = new SqlParameter("@Status", sale.Status ?? (object)DBNull.Value);
+            var idParam = new SqlParameter
+            {
+                ParameterName = "@SaleID",
+                SqlDbType = System.Data.SqlDbType.Int,
+                Direction = System.Data.ParameterDirection.Output
+            };
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spInsertSale @SaleDate, @CustomerName, @TotalAmount, @Status",
+                dateParam, customerParam, amountParam, statusParam);
+
+            return (int)idParam.Value;
+        }
+
+        public async Task UpdateAsync(Sale sale)
+        {
+            var idParam = new SqlParameter("@SaleID", sale.SaleID);
+            var dateParam = new SqlParameter("@SaleDate", sale.SaleDate);
+            var customerParam = new SqlParameter("@CustomerName", sale.CustomerName ?? (object)DBNull.Value);
+            var amountParam = new SqlParameter("@TotalAmount", sale.TotalAmount ?? (object)DBNull.Value);
+            var statusParam = new SqlParameter("@Status", sale.Status ?? (object)DBNull.Value);
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spUpdateSale @SaleID, @SaleDate, @CustomerName, @TotalAmount, @Status",
+                idParam, dateParam, customerParam, amountParam, statusParam);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var idParam = new SqlParameter("@SaleID", id);
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spDeleteSale @SaleID", idParam);
+        }
+    }
+}

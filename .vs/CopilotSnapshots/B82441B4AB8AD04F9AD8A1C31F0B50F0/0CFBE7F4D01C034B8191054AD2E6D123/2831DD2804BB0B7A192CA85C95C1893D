@@ -1,0 +1,80 @@
+﻿using Inventory.Models;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+
+namespace Inventory.Data
+{
+    public class ProductRepository
+    {
+        private readonly ApplicationDbContext _context;
+
+        public ProductRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<Product>> GetAllAsync()
+        {
+            return await _context.Products
+                .FromSqlRaw("EXEC dbo.spGetProducts")
+                .ToListAsync();
+        }
+
+        public async Task<Product?> GetByIdAsync(int id)
+        {
+            var param = new SqlParameter("@ProductID", id);
+            return await _context.Products
+                .FromSqlRaw("EXEC dbo.spGetProducts @ProductID", param)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CreateAsync(Product product)
+        {
+            var nameParam = new SqlParameter("@ProductName", product.ProductName);
+            var categoryParam = new SqlParameter("@CategoryID", product.CategoryID ?? (object)DBNull.Value);
+            var supplierParam = new SqlParameter("@SupplierID", product.SupplierID ?? (object)DBNull.Value);
+            var skuParam = new SqlParameter("@SKU", product.SKU ?? (object)DBNull.Value);
+            var descParam = new SqlParameter("@Description", product.Description ?? (object)DBNull.Value);
+            var priceParam = new SqlParameter("@UnitPrice", product.UnitPrice);
+            var reorderParam = new SqlParameter("@ReorderLevel", product.ReorderLevel ?? (object)DBNull.Value);
+            var activeParam = new SqlParameter("@IsActive", product.IsActive ?? true);
+            var idParam = new SqlParameter
+            {
+                ParameterName = "@ProductID",
+                SqlDbType = System.Data.SqlDbType.Int,
+                Direction = System.Data.ParameterDirection.Output
+            };
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spInsertProduct @ProductName, @CategoryID, @SupplierID, @SKU, @Description, @UnitPrice, @ReorderLevel, @IsActive, @ProductID OUT",
+                nameParam, categoryParam, supplierParam, skuParam, descParam, priceParam, reorderParam, activeParam, idParam);
+
+            return (int)idParam.Value;
+        }
+
+        public async Task UpdateAsync(Product product)
+        {
+            var idParam = new SqlParameter("@ProductID", product.ProductID);
+            var nameParam = new SqlParameter("@ProductName", product.ProductName);
+            var categoryParam = new SqlParameter("@CategoryID", product.CategoryID ?? (object)DBNull.Value);
+            var supplierParam = new SqlParameter("@SupplierID", product.SupplierID ?? (object)DBNull.Value);
+            var skuParam = new SqlParameter("@SKU", product.SKU ?? (object)DBNull.Value);
+            var descParam = new SqlParameter("@Description", product.Description ?? (object)DBNull.Value);
+            var priceParam = new SqlParameter("@UnitPrice", product.UnitPrice);
+            var reorderParam = new SqlParameter("@ReorderLevel", product.ReorderLevel ?? (object)DBNull.Value);
+            var activeParam = new SqlParameter("@IsActive", product.IsActive ?? true);
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spUpdateProduct @ProductID, @ProductName, @CategoryID, @SupplierID, @SKU, @Description, @UnitPrice, @ReorderLevel, @IsActive",
+                idParam, nameParam, categoryParam, supplierParam, skuParam, descParam, priceParam, reorderParam, activeParam);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var idParam = new SqlParameter("@ProductID", id);
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spDeleteProduct @ProductID", idParam);
+        }
+    }
+}

@@ -1,0 +1,72 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace Inventory.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class DebugController : ControllerBase
+    {
+        /// <summary>
+        /// Debug endpoint - No auth required - Returns JWT details from request
+        /// </summary>
+        [HttpGet("token-info")]
+        public IActionResult GetTokenInfo()
+        {
+            var authHeader = HttpContext.Request.Headers["Authorization"].ToString();
+            var user = HttpContext.User;
+
+            return Ok(new
+            {
+                authorizationHeader = authHeader,
+                isAuthenticated = user?.Identity?.IsAuthenticated ?? false,
+                userName = user?.Identity?.Name ?? "Not authenticated",
+                claims = user?.Claims?.Select(c => new { c.Type, c.Value }).ToList() ?? new List<object>(),
+                message = "If 'isAuthenticated' is false, the token validation failed. Check the Authorization header format."
+            });
+        }
+
+        /// <summary>
+        /// Protected debug endpoint - Requires valid token
+        /// </summary>
+        [HttpGet("protected-info")]
+        [Authorize]
+        public IActionResult GetProtectedInfo()
+        {
+            var user = HttpContext.User;
+            return Ok(new
+            {
+                message = "✅ Token is valid!",
+                userName = user?.Identity?.Name,
+                claims = user?.Claims?.Select(c => new { c.Type, c.Value }).ToList(),
+                isAuthenticated = user?.Identity?.IsAuthenticated
+            });
+        }
+
+        /// <summary>
+        /// Shows current JWT configuration
+        /// </summary>
+        [HttpGet("config")]
+        public IActionResult GetJwtConfig()
+        {
+            var config = new
+            {
+                issuer = "MyApi",
+                audience = "MyApiUsers",
+                tokenEndpoint = "/api/auth/login",
+                testUser = "Use a user you registered",
+                instructions = new[]
+                {
+                    "1. POST to /api/auth/login with username and password",
+                    "2. Copy the token from response",
+                    "3. In Swagger, click 'Authorize' button",
+                    "4. Paste ONLY the token (not 'Bearer' prefix)",
+                    "5. Swagger will add 'Bearer' automatically",
+                    "6. Try any protected endpoint"
+                }
+            };
+            return Ok(config);
+        }
+    }
+}

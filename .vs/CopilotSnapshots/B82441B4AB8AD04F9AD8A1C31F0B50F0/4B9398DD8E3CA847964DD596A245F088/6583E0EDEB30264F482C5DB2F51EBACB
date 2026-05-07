@@ -1,0 +1,72 @@
+﻿using Inventory.Models;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+
+namespace Inventory.Data
+{
+    public class PurchaseOrderRepository
+    {
+        private readonly ApplicationDbContext _context;
+
+        public PurchaseOrderRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<PurchaseOrder>> GetAllAsync()
+        {
+            return await _context.PurchaseOrders
+                .FromSqlRaw("EXEC dbo.spGetPurchaseOrders")
+                .ToListAsync();
+        }
+
+        public async Task<PurchaseOrder?> GetByIdAsync(int id)
+        {
+            var param = new SqlParameter("@PurchaseOrderID", id);
+            return await _context.PurchaseOrders
+                .FromSqlRaw("EXEC dbo.spGetPurchaseOrders @PurchaseOrderID", param)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CreateAsync(PurchaseOrder order)
+        {
+            var supplierParam = new SqlParameter("@SupplierID", order.SupplierID ?? (object)DBNull.Value);
+            var orderDateParam = new SqlParameter("@OrderDate", order.OrderDate);
+            var expectedDateParam = new SqlParameter("@ExpectedDate", order.ExpectedDate ?? (object)DBNull.Value);
+            var statusParam = new SqlParameter("@Status", order.Status ?? (object)DBNull.Value);
+            var idParam = new SqlParameter
+            {
+                ParameterName = "@PurchaseOrderID",
+                SqlDbType = System.Data.SqlDbType.Int,
+                Direction = System.Data.ParameterDirection.Output
+            };
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spInsertPurchaseOrder @SupplierID, @OrderDate, @ExpectedDate, @Status",
+                supplierParam, orderDateParam, expectedDateParam, statusParam);
+
+            return (int)idParam.Value;
+        }
+
+        public async Task UpdateAsync(PurchaseOrder order)
+        {
+            var idParam = new SqlParameter("@PurchaseOrderID", order.PurchaseOrderID);
+            var supplierParam = new SqlParameter("@SupplierID", order.SupplierID ?? (object)DBNull.Value);
+            var orderDateParam = new SqlParameter("@OrderDate", order.OrderDate);
+            var expectedDateParam = new SqlParameter("@ExpectedDate", order.ExpectedDate ?? (object)DBNull.Value);
+            var statusParam = new SqlParameter("@Status", order.Status ?? (object)DBNull.Value);
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spUpdatePurchaseOrder @PurchaseOrderID, @SupplierID, @OrderDate, @ExpectedDate, @Status",
+                idParam, supplierParam, orderDateParam, expectedDateParam, statusParam);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var idParam = new SqlParameter("@PurchaseOrderID", id);
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.spDeletePurchaseOrder @PurchaseOrderID", idParam);
+        }
+    }
+}
