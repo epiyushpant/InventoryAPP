@@ -1,0 +1,44 @@
+using Inventory.Data;
+using Inventory.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Inventory.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class DeliveryNotesController : ControllerBase
+    {
+        private readonly DeliveryNoteRepository _repo;
+
+        public DeliveryNotesController(DeliveryNoteRepository repo)
+        {
+            _repo = repo;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DeliveryNote>>> GetNotes()
+        {
+            var notes = await _repo.GetAllAsync();
+            return Ok(notes);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<DeliveryNote>> CreateNote(DeliveryNote note)
+        {
+            try
+            {
+                var newId = await _repo.CreateAsync(note);
+                note.DeliveryID = newId;
+                return Ok(note);
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+    }
+}

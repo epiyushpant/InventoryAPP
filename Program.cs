@@ -47,7 +47,7 @@ namespace Inventory
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtIssuer,
                     ValidAudience = jwtAudience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey ?? "temporary-secret-key-replace-in-production")),
                     ClockSkew = TimeSpan.FromMinutes(5)
                 };
 
@@ -109,6 +109,14 @@ namespace Inventory
             builder.Services.AddScoped<SaleRepository>();
             builder.Services.AddScoped<SaleDetailRepository>();
             builder.Services.AddScoped<StockMovementRepository>();
+            builder.Services.AddScoped<PostRepository>();
+            builder.Services.AddScoped<PurchaseRequisitionRepository>();
+            builder.Services.AddScoped<GRNRepository>();
+            builder.Services.AddScoped<DeliveryNoteRepository>();
+            builder.Services.AddScoped<StockAdjustmentRepository>();
+            builder.Services.AddScoped<StockTransferRepository>();
+            builder.Services.AddScoped<SalesInvoiceRepository>();
+builder.Services.AddScoped<ReportRepository>();
 
             // 7. Controllers
             builder.Services.AddControllers();
@@ -143,7 +151,24 @@ namespace Inventory
                 });
             });
 
+            if (string.IsNullOrEmpty(builder.Configuration["Jwt:Key"])) throw new Exception("JWT Key not found in configuration.");
+
             var app = builder.Build();
+
+            // Seed initial roles and admin user
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    Task.Run(async () => await DataSeeder.SeedRolesAndAdminAsync(services)).Wait();
+                    Console.WriteLine("✅ Database seeded with Roles and Admin user.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Error seeding data: {ex.Message}");
+                }
+            }
 
             // ============================================
             // MIDDLEWARE PIPELINE - ORDER IS CRITICAL!
@@ -157,9 +182,16 @@ namespace Inventory
                 Console.WriteLine("✅ Swagger enabled at /swagger");
             }
 
-            // 2. HTTPS Redirect
-            app.UseHttpsRedirection();
-            Console.WriteLine("✅ HTTPS redirection enabled");
+            // 2. HTTPS Redirect (disabled in development for frontend HTTP calls)
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+                Console.WriteLine("✅ HTTPS redirection enabled");
+            }
+            else
+            {
+                Console.WriteLine("⚠️ HTTPS redirection disabled in development");
+            }
 
             // 3. CORS - MUST be BEFORE Authentication
             app.UseCors("AllowAll");
@@ -178,7 +210,14 @@ namespace Inventory
             Console.WriteLine("✅ Controllers mapped");
 
             Console.WriteLine("\n🚀 Inventory API is starting...");
-            Console.WriteLine("📝 Documentation: https://localhost:7010/swagger");
+            if (app.Environment.IsDevelopment())
+            {
+                Console.WriteLine("📝 Documentation: http://localhost:5201/swagger");
+            }
+            else
+            {
+                Console.WriteLine("📝 Documentation: https://localhost:7010/swagger");
+            }
             Console.WriteLine("🔐 JWT Authentication is enabled\n");
 
             app.Run();

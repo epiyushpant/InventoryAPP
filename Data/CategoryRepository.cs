@@ -16,12 +16,18 @@ namespace Inventory.Data
 
         public async Task<List<Category>> GetAllAsync()
         {
-            return await _context.Categories.AsNoTracking().ToListAsync();
+            return await _context.Categories
+                .Include(c => c.ParentCategory)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<Category?> GetByIdAsync(int id)
         {
-            return await _context.Categories.AsNoTracking().FirstOrDefaultAsync(e => e.CategoryID == id);
+            return await _context.Categories
+                .Include(c => c.ParentCategory)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.CategoryID == id);
         }
 
         public async Task<int> CreateAsync(Category category)

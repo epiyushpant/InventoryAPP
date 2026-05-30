@@ -8,6 +8,7 @@ namespace Inventory.Models
     {
         // Add custom fields if needed
         public string? FullName { get; set; }
+        public string Role { get; set; } = "User"; // Default to User; Admin, Sales, Inventory, Accountant
     }
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
@@ -28,6 +29,14 @@ namespace Inventory.Models
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleDetail> SaleDetails { get; set; }
         public DbSet<StockMovement> StockMovements { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
+        public DbSet<GRN> GRNs { get; set; }
+        public DbSet<DeliveryNote> DeliveryNotes { get; set; }
+        public DbSet<SalesInvoice> SalesInvoices { get; set; }
+        public DbSet<StockAdjustment> StockAdjustments { get; set; }
+        public DbSet<StockTransfer> StockTransfers { get; set; }
+        public DbSet<UnitConversion> UnitConversions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -98,6 +107,41 @@ namespace Inventory.Models
                 .HasKey(sm => sm.MovementID);
             modelBuilder.Entity<StockMovement>()
                 .ToTable("StockMovements");
+
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.Author)
+                .WithMany()
+                .HasForeignKey(p => p.AuthorId);
+
+            // Configure PurchaseRequisition
+            modelBuilder.Entity<PurchaseRequisition>()
+                .HasKey(pr => pr.PRID);
+            modelBuilder.Entity<PurchaseRequisition>()
+                .ToTable("PurchaseRequisitions");
+
+            modelBuilder.Entity<GRN>()
+                .ToTable("GRNs");
+
+            // Configure DeliveryNote
+            modelBuilder.Entity<DeliveryNote>()
+                .HasKey(dn => dn.DeliveryID);
+            modelBuilder.Entity<DeliveryNote>()
+                .ToTable("DeliveryNotes");
+
+            modelBuilder.Entity<SalesInvoice>()
+                .ToTable("SalesInvoices");
+
+            // Configure StockAdjustment
+            modelBuilder.Entity<StockAdjustment>()
+                .HasKey(sa => sa.AdjustmentID);
+            modelBuilder.Entity<StockAdjustment>()
+                .ToTable("StockAdjustments");
+
+            // Configure StockTransfer
+            modelBuilder.Entity<StockTransfer>()
+                .HasKey(st => st.TransferID);
+            modelBuilder.Entity<StockTransfer>()
+                .ToTable("StockTransfers");
         }
     }
 }

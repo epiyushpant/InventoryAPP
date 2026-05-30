@@ -26,6 +26,7 @@ namespace Inventory.Data
 
         public async Task<int> CreateAsync(SaleDetail saledetail)
         {
+            saledetail.LineTotal = (saledetail.OrderedQuantity * saledetail.UnitPrice) - saledetail.Discount;
             _context.SaleDetails.Add(saledetail);
             await _context.SaveChangesAsync();
             return saledetail.SaleDetailID;
@@ -33,6 +34,7 @@ namespace Inventory.Data
 
         public async Task UpdateAsync(SaleDetail saledetail)
         {
+            saledetail.LineTotal = (saledetail.OrderedQuantity * saledetail.UnitPrice) - saledetail.Discount;
             _context.SaleDetails.Update(saledetail);
             await _context.SaveChangesAsync();
         }

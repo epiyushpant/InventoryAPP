@@ -47,15 +47,29 @@ namespace Inventory.Controllers
             if (id != sale.SaleID)
                 return BadRequest();
 
-            await _repo.UpdateAsync(sale);
-            return NoContent();
+            try
+            {
+                await _repo.UpdateAsync(sale);
+                return NoContent();
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSale(int id)
         {
-            await _repo.DeleteAsync(id);
-            return NoContent();
+            try
+            {
+                await _repo.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

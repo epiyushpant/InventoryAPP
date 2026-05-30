@@ -26,7 +26,9 @@ namespace Inventory.Data
 
         public async Task<int> CreateAsync(Inventory.Models.Inventory inventory)
         {
-            inventory.LastUpdated = inventory.LastUpdated?.ToUniversalTime();
+            if (inventory.LastUpdated.HasValue)
+                inventory.LastUpdated = inventory.LastUpdated.Value.ToUniversalTime();
+            
             _context.Inventories.Add(inventory);
             await _context.SaveChangesAsync();
             return inventory.InventoryID;
@@ -34,7 +36,8 @@ namespace Inventory.Data
 
         public async Task UpdateAsync(Inventory.Models.Inventory inventory)
         {
-            inventory.LastUpdated = inventory.LastUpdated?.ToUniversalTime();
+            if (inventory.LastUpdated.HasValue)
+                inventory.LastUpdated = inventory.LastUpdated.Value.ToUniversalTime();
             _context.Inventories.Update(inventory);
             await _context.SaveChangesAsync();
         }

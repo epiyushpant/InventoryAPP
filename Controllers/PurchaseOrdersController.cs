@@ -54,8 +54,15 @@ namespace Inventory.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePurchaseOrder(int id)
         {
-            await _repo.DeleteAsync(id);
-            return NoContent();
+            try
+            {
+                await _repo.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

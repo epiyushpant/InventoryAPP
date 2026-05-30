@@ -67,6 +67,10 @@ namespace Inventory.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -99,12 +103,24 @@ namespace Inventory.Migrations
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("ParentCategoryID")
+                        .HasColumnType("integer");
+
                     b.HasKey("CategoryID");
+
+                    b.HasIndex("ParentCategoryID");
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -120,18 +136,103 @@ namespace Inventory.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("text");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("BillingAddress")
                         .HasColumnType("text");
+
+                    b.Property<decimal>("CreditLimit")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("FullName")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PAN")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ShippingAddress")
                         .HasColumnType("text");
 
                     b.HasKey("CustomerID");
 
                     b.ToTable("Customers", (string)null);
+                });
+
+            modelBuilder.Entity("Inventory.Models.DeliveryNote", b =>
+                {
+                    b.Property<int>("DeliveryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DeliveryID"));
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SaleID")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ShipmentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ShippedQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TransportDetails")
+                        .HasColumnType("text");
+
+                    b.HasKey("DeliveryID");
+
+                    b.ToTable("DeliveryNotes", (string)null);
+                });
+
+            modelBuilder.Entity("Inventory.Models.GRN", b =>
+                {
+                    b.Property<int>("GRNID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("GRNID"));
+
+                    b.Property<int>("DamagedQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LocationID")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("OtherExpenses")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PurchaseOrderID")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ReceivedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ReceivedQuantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("GRNID");
+
+                    b.ToTable("GRNs", (string)null);
                 });
 
             modelBuilder.Entity("Inventory.Models.Inventory", b =>
@@ -142,16 +243,25 @@ namespace Inventory.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("InventoryID"));
 
+                    b.Property<int>("AvailableQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("LocationID")
+                    b.Property<int>("LocationID")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("ProductID")
+                    b.Property<int>("ProductID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("QuantityInStock")
+                    b.Property<int>("QuantityOnHand")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ReservedQuantity")
                         .HasColumnType("integer");
 
                     b.HasKey("InventoryID");
@@ -167,15 +277,72 @@ namespace Inventory.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LocationID"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Address")
                         .HasColumnType("text");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ContactNo")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ManagerName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Type")
                         .HasColumnType("text");
 
+                    b.Property<string>("WarehouseName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.HasKey("LocationID");
 
                     b.ToTable("Locations", (string)null);
+                });
+
+            modelBuilder.Entity("Inventory.Models.Post", b =>
+                {
+                    b.Property<int>("PostID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PostID"));
+
+                    b.Property<string>("AuthorId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("PostID");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("Inventory.Models.Product", b =>
@@ -189,24 +356,33 @@ namespace Inventory.Migrations
                     b.Property<int?>("CategoryID")
                         .HasColumnType("integer");
 
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int?>("ReorderLevel")
                         .HasColumnType("integer");
 
                     b.Property<string>("SKU")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int?>("SupplierID")
                         .HasColumnType("integer");
+
+                    b.Property<string>("UnitOfMeasure")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
@@ -224,17 +400,28 @@ namespace Inventory.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PurchaseOrderID"));
 
-                    b.Property<DateTime?>("ExpectedDate")
+                    b.Property<DateTime?>("ExpectedDeliveryDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("LocationID")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("SupplierID")
+                    b.Property<int?>("PRID")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("SupplierID")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric");
 
                     b.HasKey("PurchaseOrderID");
 
@@ -249,21 +436,58 @@ namespace Inventory.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PODetailID"));
 
-                    b.Property<int?>("ProductID")
+                    b.Property<decimal>("LineTotal")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("OrderedQuantity")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("PurchaseOrderID")
+                    b.Property<int>("ProductID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PurchaseOrderID")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("PODetailID");
+
+                    b.HasIndex("PurchaseOrderID");
+
+                    b.ToTable("PurchaseOrderDetails", (string)null);
+                });
+
+            modelBuilder.Entity("Inventory.Models.PurchaseRequisition", b =>
+                {
+                    b.Property<int>("PRID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PRID"));
+
+                    b.Property<int>("ProductID")
                         .HasColumnType("integer");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("UnitCost")
-                        .HasColumnType("numeric");
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.HasKey("PODetailID");
+                    b.Property<DateTime>("RequiredDate")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.ToTable("PurchaseOrderDetails", (string)null);
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("PRID");
+
+                    b.ToTable("PurchaseRequisitions", (string)null);
                 });
 
             modelBuilder.Entity("Inventory.Models.Sale", b =>
@@ -274,16 +498,21 @@ namespace Inventory.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SaleID"));
 
-                    b.Property<int?>("CustomerID")
+                    b.Property<int>("CustomerID")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("LocationID")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("SaleDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<decimal?>("TotalAmount")
+                    b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
 
                     b.HasKey("SaleID");
@@ -299,13 +528,19 @@ namespace Inventory.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SaleDetailID"));
 
-                    b.Property<int?>("ProductID")
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("LineTotal")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("OrderedQuantity")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Quantity")
+                    b.Property<int>("ProductID")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("SaleID")
+                    b.Property<int>("SaleID")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("UnitPrice")
@@ -313,7 +548,78 @@ namespace Inventory.Migrations
 
                     b.HasKey("SaleDetailID");
 
+                    b.HasIndex("SaleID");
+
                     b.ToTable("SalesDetails", (string)null);
+                });
+
+            modelBuilder.Entity("Inventory.Models.SalesInvoice", b =>
+                {
+                    b.Property<int>("InvoiceID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("InvoiceID"));
+
+                    b.Property<decimal>("GrandTotal")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("NonTaxableAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("SaleID")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("TaxableAmount")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("InvoiceID");
+
+                    b.ToTable("SalesInvoices", (string)null);
+                });
+
+            modelBuilder.Entity("Inventory.Models.StockAdjustment", b =>
+                {
+                    b.Property<int>("AdjustmentID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AdjustmentID"));
+
+                    b.Property<DateTime>("AdjustmentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("AdjustmentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("LocationID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text");
+
+                    b.HasKey("AdjustmentID");
+
+                    b.ToTable("StockAdjustments", (string)null);
                 });
 
             modelBuilder.Entity("Inventory.Models.StockMovement", b =>
@@ -344,6 +650,39 @@ namespace Inventory.Migrations
                     b.ToTable("StockMovements", (string)null);
                 });
 
+            modelBuilder.Entity("Inventory.Models.StockTransfer", b =>
+                {
+                    b.Property<int>("TransferID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TransferID"));
+
+                    b.Property<int>("FromLocationID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("ToLocationID")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("TransferDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("TransferID");
+
+                    b.ToTable("StockTransfers", (string)null);
+                });
+
             modelBuilder.Entity("Inventory.Models.Supplier", b =>
                 {
                     b.Property<int>("SupplierID")
@@ -356,27 +695,73 @@ namespace Inventory.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("City")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("ContactPerson")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Country")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PaymentTerms")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("SupplierName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("TaxVatNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("SupplierID");
 
                     b.ToTable("Suppliers", (string)null);
+                });
+
+            modelBuilder.Entity("Inventory.Models.UnitConversion", b =>
+                {
+                    b.Property<int>("ConversionID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ConversionID"));
+
+                    b.Property<decimal>("Factor")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("FromUnit")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ToUnit")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("ConversionID");
+
+                    b.ToTable("UnitConversions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -511,6 +896,42 @@ namespace Inventory.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Inventory.Models.Category", b =>
+                {
+                    b.HasOne("Inventory.Models.Category", "ParentCategory")
+                        .WithMany()
+                        .HasForeignKey("ParentCategoryID");
+
+                    b.Navigation("ParentCategory");
+                });
+
+            modelBuilder.Entity("Inventory.Models.Post", b =>
+                {
+                    b.HasOne("Inventory.Models.ApplicationUser", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId");
+
+                    b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("Inventory.Models.PurchaseOrderDetail", b =>
+                {
+                    b.HasOne("Inventory.Models.PurchaseOrder", null)
+                        .WithMany("PurchaseOrderDetails")
+                        .HasForeignKey("PurchaseOrderID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Inventory.Models.SaleDetail", b =>
+                {
+                    b.HasOne("Inventory.Models.Sale", null)
+                        .WithMany("SaleDetails")
+                        .HasForeignKey("SaleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -560,6 +981,16 @@ namespace Inventory.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Inventory.Models.PurchaseOrder", b =>
+                {
+                    b.Navigation("PurchaseOrderDetails");
+                });
+
+            modelBuilder.Entity("Inventory.Models.Sale", b =>
+                {
+                    b.Navigation("SaleDetails");
                 });
 #pragma warning restore 612, 618
         }

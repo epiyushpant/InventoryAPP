@@ -26,6 +26,7 @@ namespace Inventory.Data
 
         public async Task<int> CreateAsync(PurchaseOrderDetail purchaseorderdetail)
         {
+            purchaseorderdetail.LineTotal = purchaseorderdetail.OrderedQuantity * purchaseorderdetail.UnitPrice;
             _context.PurchaseOrderDetails.Add(purchaseorderdetail);
             await _context.SaveChangesAsync();
             return purchaseorderdetail.PODetailID;
@@ -33,6 +34,7 @@ namespace Inventory.Data
 
         public async Task UpdateAsync(PurchaseOrderDetail purchaseorderdetail)
         {
+            purchaseorderdetail.LineTotal = purchaseorderdetail.OrderedQuantity * purchaseorderdetail.UnitPrice;
             _context.PurchaseOrderDetails.Update(purchaseorderdetail);
             await _context.SaveChangesAsync();
         }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "r52d6QlL6lQ=",
+  "dgSpecHash": "FiuM/OHsIZo=",
   "success": true,
-  "projectFilePath": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Inventory.csproj",
+  "projectFilePath": "C:\\Projects\\api\\Inventory\\Inventory.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\erpiy\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\erpiy\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.19\\microsoft.aspnetcore.authentication.jwtbearer.8.0.19.nupkg.sha512",
