@@ -1,38 +1,14 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\erpiy\\source\\repos\\Inventory\\",
+  "WorkspaceRootPath": "C:\\Projects\\api\\Inventory\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|c:\\users\\erpiy\\source\\repos\\inventory\\data\\salerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|solutionrelative:data\\salerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|c:\\projects\\api\\inventory\\controllers\\postscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|solutionrelative:controllers\\postscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|c:\\users\\erpiy\\source\\repos\\inventory\\data\\locationrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|solutionrelative:data\\locationrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|c:\\users\\erpiy\\source\\repos\\inventory\\data\\categoryrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|solutionrelative:data\\categoryrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|c:\\users\\erpiy\\source\\repos\\inventory\\data\\customerrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|solutionrelative:data\\customerrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|c:\\users\\erpiy\\source\\repos\\inventory\\migrations\\20260228045021_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|solutionrelative:migrations\\20260228045021_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|c:\\users\\erpiy\\source\\repos\\inventory\\controllers\\categoriescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|solutionrelative:controllers\\categoriescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|c:\\users\\erpiy\\source\\repos\\inventory\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|c:\\users\\erpiy\\source\\repos\\inventory\\migrations\\20260328050140_add locations tables and edit existing tabels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|solutionrelative:migrations\\20260328050140_add locations tables and edit existing tabels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|c:\\projects\\api\\inventory\\controllers\\deliverynotescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2C373446-07CC-476D-AA3F-0C0BF747BC49}|Inventory.csproj|solutionrelative:controllers\\deliverynotescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -50,100 +26,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "CustomerRepository.cs",
-              "DocumentMoniker": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Data\\CustomerRepository.cs",
-              "RelativeDocumentMoniker": "Data\\CustomerRepository.cs",
-              "ToolTip": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Data\\CustomerRepository.cs",
-              "RelativeToolTip": "Data\\CustomerRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T14:28:44.817Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "CategoryRepository.cs",
-              "DocumentMoniker": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Data\\CategoryRepository.cs",
-              "RelativeDocumentMoniker": "Data\\CategoryRepository.cs",
-              "ToolTip": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Data\\CategoryRepository.cs",
-              "RelativeToolTip": "Data\\CategoryRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T14:28:40.2Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "20260228045021_InitialCreate.cs",
-              "DocumentMoniker": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Migrations\\20260228045021_InitialCreate.cs",
-              "RelativeDocumentMoniker": "Migrations\\20260228045021_InitialCreate.cs",
-              "ToolTip": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Migrations\\20260228045021_InitialCreate.cs",
-              "RelativeToolTip": "Migrations\\20260228045021_InitialCreate.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAyAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T14:28:33.712Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "LocationRepository.cs",
-              "DocumentMoniker": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Data\\LocationRepository.cs",
-              "RelativeDocumentMoniker": "Data\\LocationRepository.cs",
-              "ToolTip": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Data\\LocationRepository.cs",
-              "RelativeToolTip": "Data\\LocationRepository.cs",
+              "Title": "DeliveryNotesController.cs",
+              "DocumentMoniker": "C:\\Projects\\api\\Inventory\\Controllers\\DeliveryNotesController.cs",
+              "RelativeDocumentMoniker": "Controllers\\DeliveryNotesController.cs",
+              "ToolTip": "C:\\Projects\\api\\Inventory\\Controllers\\DeliveryNotesController.cs",
+              "RelativeToolTip": "Controllers\\DeliveryNotesController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T14:28:27.696Z"
+              "WhenOpened": "2026-06-16T11:24:50.534Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "SaleRepository.cs",
-              "DocumentMoniker": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Data\\SaleRepository.cs",
-              "RelativeDocumentMoniker": "Data\\SaleRepository.cs",
-              "ToolTip": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Data\\SaleRepository.cs",
-              "RelativeToolTip": "Data\\SaleRepository.cs",
-              "ViewState": "AgIAABIAAAAAAAAAAAAuwBsAAAAJAAAAAAAAAA==",
+              "Title": "PostsController.cs",
+              "DocumentMoniker": "C:\\Projects\\api\\Inventory\\Controllers\\PostsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\PostsController.cs",
+              "ToolTip": "C:\\Projects\\api\\Inventory\\Controllers\\PostsController.cs",
+              "RelativeToolTip": "Controllers\\PostsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-28T05:13:50.432Z",
+              "WhenOpened": "2026-06-16T05:01:04.648Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "CategoriesController.cs",
-              "DocumentMoniker": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Controllers\\CategoriesController.cs",
-              "RelativeDocumentMoniker": "Controllers\\CategoriesController.cs",
-              "ToolTip": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Controllers\\CategoriesController.cs",
-              "RelativeToolTip": "Controllers\\CategoriesController.cs",
-              "ViewState": "AgIAABcAAAAAAAAAAAAqwB8AAAAiAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-28T04:31:37.945Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "20260328050140_add locations tables and edit existing tabels.cs",
-              "DocumentMoniker": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Migrations\\20260328050140_add locations tables and edit existing tabels.cs",
-              "RelativeDocumentMoniker": "Migrations\\20260328050140_add locations tables and edit existing tabels.cs",
-              "ToolTip": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Migrations\\20260328050140_add locations tables and edit existing tabels.cs",
-              "RelativeToolTip": "Migrations\\20260328050140_add locations tables and edit existing tabels.cs",
-              "ViewState": "AgIAAFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-28T05:01:40.994Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\erpiy\\source\\repos\\Inventory\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAKgAAAAAAAAAAADwv7cAAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T07:10:16.451Z"
             }
           ]
         }

@@ -23,7 +23,19 @@ namespace Inventory.Models
 
         public string? BillingAddress { get; set; }
 
+        [StringLength(100)]
+        public string? BillingCity { get; set; }
+
+        [StringLength(100)]
+        public string? BillingCountry { get; set; }
+
         public string? ShippingAddress { get; set; }
+
+        [StringLength(100)]
+        public string? ShippingCity { get; set; }
+
+        [StringLength(100)]
+        public string? ShippingCountry { get; set; }
 
         public decimal CreditLimit { get; set; }
         

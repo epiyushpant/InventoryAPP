@@ -37,6 +37,10 @@ namespace Inventory.Models
         public DbSet<StockAdjustment> StockAdjustments { get; set; }
         public DbSet<StockTransfer> StockTransfers { get; set; }
         public DbSet<UnitConversion> UnitConversions { get; set; }
+        public DbSet<Country> Countries { get; set; }
+        public DbSet<Province> Provinces { get; set; }
+        public DbSet<District> Districts { get; set; }
+        public DbSet<Municipality> Municipalities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -142,6 +146,39 @@ namespace Inventory.Models
                 .HasKey(st => st.TransferID);
             modelBuilder.Entity<StockTransfer>()
                 .ToTable("StockTransfers");
+
+            // Configure Country
+            modelBuilder.Entity<Country>()
+                .HasKey(c => c.CountryID);
+            modelBuilder.Entity<Country>()
+                .ToTable("Countries");
+
+            // Configure Province
+            modelBuilder.Entity<Province>()
+                .HasKey(p => p.ProvinceID);
+            modelBuilder.Entity<Province>()
+                .ToTable("Provinces")
+                .HasOne(p => p.Country)
+                .WithMany()
+                .HasForeignKey(p => p.CountryID);
+
+            // Configure District
+            modelBuilder.Entity<District>()
+                .HasKey(d => d.DistrictID);
+            modelBuilder.Entity<District>()
+                .ToTable("Districts")
+                .HasOne(d => d.Province)
+                .WithMany()
+                .HasForeignKey(d => d.ProvinceID);
+
+            // Configure Municipality
+            modelBuilder.Entity<Municipality>()
+                .HasKey(m => m.MunicipalityID);
+            modelBuilder.Entity<Municipality>()
+                .ToTable("Municipalities")
+                .HasOne(m => m.District)
+                .WithMany()
+                .HasForeignKey(m => m.DistrictID);
         }
     }
 }

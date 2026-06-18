@@ -163,6 +163,8 @@ builder.Services.AddScoped<ReportRepository>();
                 {
                     Task.Run(async () => await DataSeeder.SeedRolesAndAdminAsync(services)).Wait();
                     Console.WriteLine("✅ Database seeded with Roles and Admin user.");
+                    
+                    Task.Run(async () => await LocationSeeder.SeedLocationsAsync(services)).Wait();
                 }
                 catch (Exception ex)
                 {

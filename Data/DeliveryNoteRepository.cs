@@ -73,6 +73,13 @@ namespace Inventory.Data
             }
         }
 
+        public async Task UpdateAsync(DeliveryNote note)
+        {
+            note.ShipmentDate = note.ShipmentDate.ToUniversalTime();
+            _context.DeliveryNotes.Update(note);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task DeleteAsync(int id)
         {
             var entity = await _context.DeliveryNotes.FindAsync(id);

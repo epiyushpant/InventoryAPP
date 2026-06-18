@@ -40,5 +40,22 @@ namespace Inventory.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateNote(int id, DeliveryNote note)
+        {
+            if (id != note.DeliveryID)
+                return BadRequest();
+
+            await _repo.UpdateAsync(note);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteNote(int id)
+        {
+            await _repo.DeleteAsync(id);
+            return NoContent();
+        }
     }
 }

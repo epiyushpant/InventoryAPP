@@ -37,5 +37,7 @@ namespace Inventory.Models
         public string? PaymentTerms { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        
     }
 }

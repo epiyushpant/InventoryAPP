@@ -397,3 +397,5 @@ C:\Projects\api\inventory\obj\Debug\net10.0\refint\Inventory.dll
 C:\Projects\api\inventory\obj\Debug\net10.0\Inventory.pdb
 C:\Projects\api\inventory\obj\Debug\net10.0\Inventory.genruntimeconfig.cache
 C:\Projects\api\inventory\obj\Debug\net10.0\ref\Inventory.dll
+C:\Projects\api\Inventory\bin\Debug\net10.0\nepal-divisions.json
+C:\Projects\api\Inventory\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
