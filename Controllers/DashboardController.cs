@@ -1,10 +1,6 @@
+using Inventory.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Inventory.Models;
-using Inventory.Data;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Inventory.Controllers
 {

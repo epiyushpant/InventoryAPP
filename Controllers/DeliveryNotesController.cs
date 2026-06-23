@@ -2,8 +2,6 @@ using Inventory.Data;
 using Inventory.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Inventory.Controllers
 {
@@ -35,7 +33,7 @@ namespace Inventory.Controllers
                 note.DeliveryID = newId;
                 return Ok(note);
             }
-            catch (System.InvalidOperationException ex)
+            catch (InvalidOperationException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }

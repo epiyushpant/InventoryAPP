@@ -1,7 +1,6 @@
 using Inventory.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 
 namespace Inventory.Data
 {
@@ -113,7 +112,7 @@ namespace Inventory.Data
             {
                 if (entity.Status == "Completed")
                 {
-                    throw new System.InvalidOperationException("Cannot delete a completed purchase order. Please cancel it first or keep it for records.");
+                    throw new InvalidOperationException("Cannot delete a completed purchase order. Please cancel it first or keep it for records.");
                 }
                 _context.PurchaseOrders.Remove(entity);
                 await _context.SaveChangesAsync();

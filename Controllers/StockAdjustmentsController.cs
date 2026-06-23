@@ -2,8 +2,6 @@ using Inventory.Data;
 using Inventory.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Inventory.Controllers
 {

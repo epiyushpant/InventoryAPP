@@ -1,11 +1,6 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Inventory.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
 
 namespace Inventory.Data
 {

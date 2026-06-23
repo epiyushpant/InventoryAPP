@@ -1,12 +1,10 @@
+using Inventory.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Inventory.Models;
-using System.Collections.Generic;
-using System.Linq;
 
 [ApiController]
 [Route("api/[controller]")]

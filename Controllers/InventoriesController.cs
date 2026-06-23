@@ -1,5 +1,4 @@
 using Inventory.Data;
-using Inventory.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
