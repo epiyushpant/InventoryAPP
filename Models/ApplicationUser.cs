@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Inventory.Services;
 
 namespace Inventory.Models
 {
@@ -9,13 +10,23 @@ namespace Inventory.Models
         // Add custom fields if needed
         public string? FullName { get; set; }
         public string Role { get; set; } = "User"; // Default to User; Admin, Sales, Inventory, Accountant
+        /// <summary>Shop this user belongs to. JWT claim tenant_id.</summary>
+        public int TenantId { get; set; } = 1;
     }
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        private readonly ITenantContext? _tenantContext;
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+        }
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ITenantContext tenantContext)
+            : base(options)
+        {
+            _tenantContext = tenantContext;
         }
 
         public DbSet<Category> Categories { get; set; }
@@ -41,6 +52,9 @@ namespace Inventory.Models
         public DbSet<Province> Provinces { get; set; }
         public DbSet<District> Districts { get; set; }
         public DbSet<Municipality> Municipalities { get; set; }
+        public DbSet<Tenant> Tenants { get; set; }
+        public DbSet<TenantCapability> TenantCapabilities { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -179,6 +193,95 @@ namespace Inventory.Models
                 .HasOne(m => m.District)
                 .WithMany()
                 .HasForeignKey(m => m.DistrictID);
+
+            modelBuilder.Entity<Tenant>()
+                .ToTable("Tenants")
+                .HasKey(t => t.TenantId);
+
+            modelBuilder.Entity<TenantCapability>()
+                .ToTable("TenantCapabilities")
+                .HasKey(c => c.TenantCapabilityId);
+            modelBuilder.Entity<TenantCapability>()
+                .HasIndex(c => new { c.TenantId, c.Key })
+                .IsUnique();
+            modelBuilder.Entity<TenantCapability>()
+                .HasOne(c => c.Tenant)
+                .WithMany(t => t.Capabilities)
+                .HasForeignKey(c => c.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RolePermission>()
+                .ToTable("RolePermissions")
+                .HasKey(p => p.RolePermissionId);
+            modelBuilder.Entity<RolePermission>()
+                .HasIndex(p => new { p.TenantId, p.RoleName, p.Key })
+                .IsUnique();
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(p => p.Tenant)
+                .WithMany()
+                .HasForeignKey(p => p.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Wave F — tenant isolation (skipped when no tenant on context, e.g. migrations/startup)
+            ApplyTenantFilter<Category>(modelBuilder);
+            ApplyTenantFilter<Supplier>(modelBuilder);
+            ApplyTenantFilter<Customer>(modelBuilder);
+            ApplyTenantFilter<Location>(modelBuilder);
+            ApplyTenantFilter<Product>(modelBuilder);
+            ApplyTenantFilter<Inventory>(modelBuilder);
+            ApplyTenantFilter<PurchaseOrder>(modelBuilder);
+            ApplyTenantFilter<PurchaseOrderDetail>(modelBuilder);
+            ApplyTenantFilter<Sale>(modelBuilder);
+            ApplyTenantFilter<SaleDetail>(modelBuilder);
+            ApplyTenantFilter<StockMovement>(modelBuilder);
+            ApplyTenantFilter<PurchaseRequisition>(modelBuilder);
+            ApplyTenantFilter<GRN>(modelBuilder);
+            ApplyTenantFilter<DeliveryNote>(modelBuilder);
+            ApplyTenantFilter<SalesInvoice>(modelBuilder);
+            ApplyTenantFilter<StockAdjustment>(modelBuilder);
+            ApplyTenantFilter<StockTransfer>(modelBuilder);
+            ApplyTenantFilter<UnitConversion>(modelBuilder);
+            ApplyTenantFilter<Post>(modelBuilder);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasQueryFilter(u => _tenantContext == null || !_tenantContext.HasTenant || u.TenantId == _tenantContext.TenantId);
+        }
+
+        private void ApplyTenantFilter<TEntity>(ModelBuilder modelBuilder) where TEntity : class, ITenantScoped
+        {
+            modelBuilder.Entity<TEntity>()
+                .HasIndex(e => e.TenantId);
+            modelBuilder.Entity<TEntity>()
+                .HasQueryFilter(e => _tenantContext == null || !_tenantContext.HasTenant || e.TenantId == _tenantContext.TenantId);
+        }
+
+        public override int SaveChanges()
+        {
+            StampTenantIds();
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            StampTenantIds();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void StampTenantIds()
+        {
+            if (_tenantContext == null || !_tenantContext.HasTenant) return;
+
+            foreach (var entry in ChangeTracker.Entries<ITenantScoped>())
+            {
+                if (entry.State == EntityState.Added)
+                    entry.Entity.TenantId = _tenantContext.TenantId;
+            }
+
+            foreach (var entry in ChangeTracker.Entries<ApplicationUser>())
+            {
+                if (entry.State == EntityState.Added)
+                    entry.Entity.TenantId = _tenantContext.TenantId;
+            }
         }
     }
 }

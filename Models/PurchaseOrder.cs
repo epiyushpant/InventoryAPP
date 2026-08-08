@@ -1,10 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Inventory.Services;
+
 namespace Inventory.Models
 {
-    public class PurchaseOrder
+    public class PurchaseOrder : ITenantScoped
     {
+        public int TenantId { get; set; } = 1;
+
         [Key]
         public int PurchaseOrderID { get; set; }
 

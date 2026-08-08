@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Inventory.Data; 
+using Inventory.Data;
+using Inventory.Services;
+using Inventory.Middleware;
 using System.Text;
 
 namespace Inventory
@@ -116,7 +118,11 @@ namespace Inventory
             builder.Services.AddScoped<StockAdjustmentRepository>();
             builder.Services.AddScoped<StockTransferRepository>();
             builder.Services.AddScoped<SalesInvoiceRepository>();
-builder.Services.AddScoped<ReportRepository>();
+            builder.Services.AddScoped<ReportRepository>();
+            builder.Services.AddScoped<UnitConversionRepository>();
+            builder.Services.AddScoped<TenantCapabilityService>();
+            builder.Services.AddScoped<RolePermissionService>();
+            builder.Services.AddScoped<ITenantContext, TenantContext>();
 
             // 7. Controllers
             builder.Services.AddControllers();
@@ -165,6 +171,10 @@ builder.Services.AddScoped<ReportRepository>();
                     Console.WriteLine("✅ Database seeded with Roles and Admin user.");
                     
                     Task.Run(async () => await LocationSeeder.SeedLocationsAsync(services)).Wait();
+
+                    var caps = services.GetRequiredService<TenantCapabilityService>();
+                    Task.Run(async () => await caps.GetOrCreateDefaultTenantAsync()).Wait();
+                    Console.WriteLine("✅ Default tenant + capabilities seeded.");
                 }
                 catch (Exception ex)
                 {
@@ -202,6 +212,9 @@ builder.Services.AddScoped<ReportRepository>();
             // 4. Authentication - MUST be BEFORE Authorization
             app.UseAuthentication();
             Console.WriteLine("✅ Authentication middleware enabled");
+
+            app.UseMiddleware<TenantResolutionMiddleware>();
+            Console.WriteLine("✅ Tenant resolution middleware enabled");
 
             // 5. Authorization - MUST be AFTER Authentication
             app.UseAuthorization();

@@ -47,6 +47,9 @@ public class AuthController : ControllerBase
                 authClaims.Add(new Claim(ClaimTypes.Role, "User"));
             }
 
+            var tenantId = user.TenantId > 0 ? user.TenantId : 1;
+            authClaims.Add(new Claim("tenant_id", tenantId.ToString()));
+
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "DefaultSecretKeyForJwtToken123"));
 
             var token = new JwtSecurityToken(
@@ -64,7 +67,8 @@ public class AuthController : ControllerBase
                 role = userRoles.FirstOrDefault() ?? "User",
                 roles = userRoles,
                 fullName = user.FullName,
-                userName = user.UserName
+                userName = user.UserName,
+                tenantId
             });
         }
         return Unauthorized("Invalid credentials");
@@ -77,7 +81,8 @@ public class AuthController : ControllerBase
         {
             UserName = model.Username,
             Email = model.Email,
-            FullName = model.FullName
+            FullName = model.FullName,
+            TenantId = 1
         };
 
         var result = await _userManager.CreateAsync(user, model.Password);

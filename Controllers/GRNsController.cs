@@ -1,4 +1,5 @@
 using Inventory.Data;
+using Inventory.Filters;
 using Inventory.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace Inventory.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [RequireCapability("form.grns")]
     public class GRNsController : ControllerBase
     {
         private readonly GRNRepository _repo;
@@ -35,9 +37,45 @@ namespace Inventory.Controllers
         [HttpPost]
         public async Task<ActionResult<GRN>> CreateGRN(GRN grn)
         {
-            var newId = await _repo.CreateAsync(grn);
-            grn.GRNID = newId;
-            return CreatedAtAction(nameof(GetGRN), new { id = newId }, grn);
+            try
+            {
+                var newId = await _repo.CreateAsync(grn);
+                grn.GRNID = newId;
+                return CreatedAtAction(nameof(GetGRN), new { id = newId }, grn);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateGRN(int id, GRN grn)
+        {
+            if (id != grn.GRNID) return BadRequest();
+            try
+            {
+                await _repo.UpdateAsync(grn);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteGRN(int id)
+        {
+            try
+            {
+                await _repo.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

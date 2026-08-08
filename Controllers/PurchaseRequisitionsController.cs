@@ -1,4 +1,5 @@
 using Inventory.Data;
+using Inventory.Filters;
 using Inventory.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace Inventory.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [RequireCapability("form.purchaseRequisitions")]
     public class PurchaseRequisitionsController : ControllerBase
     {
         private readonly PurchaseRequisitionRepository _repo;
@@ -20,8 +22,7 @@ namespace Inventory.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PurchaseRequisition>>> GetPRs()
         {
-            var prs = await _repo.GetAllAsync();
-            return Ok(prs);
+            return Ok(await _repo.GetAllAsync());
         }
 
         [HttpGet("{id}")]
@@ -35,24 +36,45 @@ namespace Inventory.Controllers
         [HttpPost]
         public async Task<ActionResult<PurchaseRequisition>> CreatePR(PurchaseRequisition pr)
         {
-            var newId = await _repo.CreateAsync(pr);
-            pr.PRID = newId;
-            return CreatedAtAction(nameof(GetPR), new { id = newId }, pr);
+            try
+            {
+                var newId = await _repo.CreateAsync(pr);
+                pr.PRID = newId;
+                return CreatedAtAction(nameof(GetPR), new { id = newId }, pr);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePR(int id, PurchaseRequisition pr)
         {
             if (id != pr.PRID) return BadRequest();
-            await _repo.UpdateAsync(pr);
-            return NoContent();
+            try
+            {
+                await _repo.UpdateAsync(pr);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePR(int id)
         {
-            await _repo.DeleteAsync(id);
-            return NoContent();
+            try
+            {
+                await _repo.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

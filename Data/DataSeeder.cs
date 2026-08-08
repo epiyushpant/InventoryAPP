@@ -30,7 +30,8 @@ namespace Inventory.Data
                     UserName = "admin",
                     Email = adminEmail,
                     FullName = "System Administrator",
-                    Role = "Admin" 
+                    Role = "Admin",
+                    TenantId = 1
                 };
 
                 var result = await userManager.CreateAsync(adminUser, "Admin@123");
@@ -41,6 +42,11 @@ namespace Inventory.Data
             }
             else
             {
+                if (adminUser.TenantId <= 0)
+                {
+                    adminUser.TenantId = 1;
+                    await userManager.UpdateAsync(adminUser);
+                }
                 if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
                 {
                     await userManager.AddToRoleAsync(adminUser, "Admin");

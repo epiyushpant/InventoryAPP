@@ -1,0 +1,34 @@
+# See https://help.github.com/articles/ignoring-files/
+
+# User-specific
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build
+bin/
+obj/
+.vs/
+.idea/
+
+# Logs
+*.log
+app.log
+build_error*.txt
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# EF local
+appsettings.*.local.json
+
+# Publish
+publish/
+
+# VS Code (optional local overrides)
+.vscode/launch.json.local

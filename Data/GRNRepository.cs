@@ -1,4 +1,5 @@
 using Inventory.Models;
+using Inventory.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inventory.Data
@@ -37,23 +38,26 @@ namespace Inventory.Data
                     var inventory = await _context.Inventories
                         .FirstOrDefaultAsync(i => i.ProductID == grn.ProductID && i.LocationID == grn.LocationID);
 
+                    // Damaged qty must not increase sellable stock
+                    int sellableQty = Math.Max(0, grn.ReceivedQuantity - grn.DamagedQuantity);
+
                     if (inventory == null)
                     {
                         inventory = new Inventory.Models.Inventory
                         {
                             ProductID = grn.ProductID,
                             LocationID = grn.LocationID,
-                            QuantityOnHand = grn.ReceivedQuantity,
-                            AvailableQuantity = grn.ReceivedQuantity,
+                            QuantityOnHand = sellableQty,
+                            AvailableQuantity = sellableQty,
                             LastUpdated = DateTime.UtcNow,
-                            ExpiryDate = grn.ExpiryDate // Setting expiry from GRN
+                            ExpiryDate = grn.ExpiryDate
                         };
                         _context.Inventories.Add(inventory);
                     }
                     else
                     {
-                        inventory.QuantityOnHand += grn.ReceivedQuantity;
-                        inventory.AvailableQuantity += grn.ReceivedQuantity;
+                        inventory.QuantityOnHand += sellableQty;
+                        inventory.AvailableQuantity += sellableQty;
                         inventory.LastUpdated = DateTime.UtcNow;
                         if (grn.ExpiryDate.HasValue) inventory.ExpiryDate = grn.ExpiryDate;
                         _context.Inventories.Update(inventory);
@@ -72,12 +76,11 @@ namespace Inventory.Data
                         _context.Products.Update(product);
                     }
 
-                    // Add Stock Movement
                     var movement = new StockMovement
                     {
                         ProductID = grn.ProductID,
                         MovementType = "GRN",
-                        QuantityChange = grn.ReceivedQuantity,
+                        QuantityChange = sellableQty,
                         MovementDate = DateTime.UtcNow,
                         Reference = $"GRN-{grn.GRNID} (PO-{grn.PurchaseOrderID})"
                     };
@@ -98,19 +101,14 @@ namespace Inventory.Data
 
         public async Task UpdateAsync(GRN grn)
         {
-            grn.ReceivedDate = grn.ReceivedDate.ToUniversalTime();
-            _context.GRNs.Update(grn);
-            await _context.SaveChangesAsync();
+            DocumentLock.EnsurePostedImmutable("GRN");
+            await Task.CompletedTask;
         }
 
         public async Task DeleteAsync(int id)
         {
-            var entity = await _context.GRNs.FindAsync(id);
-            if (entity != null)
-            {
-                _context.GRNs.Remove(entity);
-                await _context.SaveChangesAsync();
-            }
+            DocumentLock.EnsurePostedImmutable("GRN");
+            await Task.CompletedTask;
         }
     }
 }

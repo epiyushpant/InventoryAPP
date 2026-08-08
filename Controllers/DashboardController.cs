@@ -29,9 +29,22 @@ namespace Inventory.Controllers
 
             var outOfStockCount = await _context.Inventories.CountAsync(i => i.QuantityOnHand <= 0);
 
+            var today = DateTime.UtcNow.Date;
+            var expiryHorizon = today.AddDays(90);
+            var expiringSoonCount = await _context.Inventories.CountAsync(i =>
+                i.ExpiryDate.HasValue &&
+                i.ExpiryDate.Value.Date >= today &&
+                i.ExpiryDate.Value.Date <= expiryHorizon &&
+                i.QuantityOnHand > 0);
+            var expiredCount = await _context.Inventories.CountAsync(i =>
+                i.ExpiryDate.HasValue &&
+                i.ExpiryDate.Value.Date < today &&
+                i.QuantityOnHand > 0);
+
             var totalOutstanding = await _context.SalesInvoices
                 .Where(i => i.Status != "Paid")
-                .SumAsync(i => i.GrandTotal);
+                .SumAsync(i => (decimal?)i.GrandTotal) ?? 0m;
+            var dueInvoiceCount = await _context.SalesInvoices.CountAsync(i => i.Status == "Due" || i.Status == "Partial");
 
             var topProducts = await (from sd in _context.SaleDetails
                                      join p in _context.Products on sd.ProductID equals p.ProductID
@@ -76,6 +89,9 @@ namespace Inventory.Controllers
                 TotalRevenue = totalRevenue,
                 LowStockCount = lowStockCount,
                 OutOfStockCount = outOfStockCount,
+                ExpiringSoonCount = expiringSoonCount,
+                ExpiredCount = expiredCount,
+                DueInvoiceCount = dueInvoiceCount,
                 TotalOutstanding = totalOutstanding,
                 TopProducts = topProducts,
                 VatSummary = new {

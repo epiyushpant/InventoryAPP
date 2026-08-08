@@ -1,7 +1,11 @@
+using Inventory.Services;
+
 namespace Inventory.Models
 {
-    public class StockMovement
+    public class StockMovement : ITenantScoped
     {
+        public int TenantId { get; set; } = 1;
+
         public int MovementID { get; set; }
         public int? ProductID { get; set; }
         public string? MovementType { get; set; }

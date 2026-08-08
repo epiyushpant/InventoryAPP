@@ -1,9 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 
+using Inventory.Services;
+
 namespace Inventory.Models
 {
-    public class Location
+    public class Location : ITenantScoped
     {
+        public int TenantId { get; set; } = 1;
+
         [Key]
         public int LocationID { get; set; }
 

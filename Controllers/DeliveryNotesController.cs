@@ -1,4 +1,5 @@
 using Inventory.Data;
+using Inventory.Filters;
 using Inventory.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace Inventory.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [RequireCapability("form.deliveryNotes")]
     public class DeliveryNotesController : ControllerBase
     {
         private readonly DeliveryNoteRepository _repo;
@@ -20,8 +22,7 @@ namespace Inventory.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DeliveryNote>>> GetNotes()
         {
-            var notes = await _repo.GetAllAsync();
-            return Ok(notes);
+            return Ok(await _repo.GetAllAsync());
         }
 
         [HttpPost]
@@ -42,18 +43,30 @@ namespace Inventory.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNote(int id, DeliveryNote note)
         {
-            if (id != note.DeliveryID)
-                return BadRequest();
-
-            await _repo.UpdateAsync(note);
-            return NoContent();
+            if (id != note.DeliveryID) return BadRequest();
+            try
+            {
+                await _repo.UpdateAsync(note);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNote(int id)
         {
-            await _repo.DeleteAsync(id);
-            return NoContent();
+            try
+            {
+                await _repo.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

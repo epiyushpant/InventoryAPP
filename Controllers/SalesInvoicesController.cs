@@ -1,4 +1,5 @@
 using Inventory.Data;
+using Inventory.Filters;
 using Inventory.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace Inventory.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [RequireCapability("form.salesInvoices")]
     public class SalesInvoicesController : ControllerBase
     {
         private readonly SalesInvoiceRepository _repo;
@@ -36,9 +38,16 @@ namespace Inventory.Controllers
         [HttpPost]
         public async Task<ActionResult<SalesInvoice>> CreateInvoice(SalesInvoice invoice)
         {
-            var newId = await _repo.CreateAsync(invoice);
-            invoice.InvoiceID = newId;
-            return CreatedAtAction(nameof(GetInvoice), new { id = newId }, invoice);
+            try
+            {
+                var newId = await _repo.CreateAsync(invoice);
+                invoice.InvoiceID = newId;
+                return CreatedAtAction(nameof(GetInvoice), new { id = newId }, invoice);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
@@ -47,8 +56,15 @@ namespace Inventory.Controllers
             if (id != invoice.InvoiceID)
                 return BadRequest();
 
-            await _repo.UpdateAsync(invoice);
-            return NoContent();
+            try
+            {
+                await _repo.UpdateAsync(invoice);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]

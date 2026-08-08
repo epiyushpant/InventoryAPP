@@ -1,4 +1,5 @@
 using Inventory.Models;
+using Inventory.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inventory.Data
@@ -24,6 +25,7 @@ namespace Inventory.Data
 
         public async Task<int> CreateAsync(Customer customer)
         {
+            NepalPan.EnsureValidOrEmpty(customer.PAN);
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
             return customer.CustomerID;
@@ -31,6 +33,7 @@ namespace Inventory.Data
 
         public async Task UpdateAsync(Customer customer)
         {
+            NepalPan.EnsureValidOrEmpty(customer.PAN);
             _context.Customers.Update(customer);
             await _context.SaveChangesAsync();
         }

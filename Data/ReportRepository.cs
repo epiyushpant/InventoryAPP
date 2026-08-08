@@ -69,7 +69,7 @@ namespace Inventory.Data
                     var customer = customers.FirstOrDefault(c => c.CustomerID == sale?.CustomerID);
                     return new
                     {
-                        InvoiceID = $"INV-{i.InvoiceID}",
+                        InvoiceID = string.IsNullOrEmpty(i.InvoiceNumber) ? $"INV-{i.InvoiceID}" : i.InvoiceNumber,
                         Date = i.InvoiceDate,
                         SaleRef = $"SO-{i.SaleID}",
                         Customer = customer?.FullName ?? $"Customer #{sale?.CustomerID}",
@@ -137,7 +137,7 @@ namespace Inventory.Data
                 var customer = customers.FirstOrDefault(c => c.CustomerID == sale?.CustomerID);
                 return new {
                     Date = i.InvoiceDate,
-                    InvoiceNo = $"INV-{i.InvoiceID}",
+                        InvoiceNo = string.IsNullOrEmpty(i.InvoiceNumber) ? $"INV-{i.InvoiceID}" : i.InvoiceNumber,
                     CustomerName = customer?.FullName ?? "Cash Sale",
                     PAN = customer?.PAN ?? "-",
                     TaxableAmount = i.TaxableAmount,
@@ -193,6 +193,37 @@ namespace Inventory.Data
                     TotalValue = stock * p.CostPrice
                 };
             }).ToList();
+        }
+
+        public async Task<object> GetExpirySoonReportAsync(int days = 90)
+        {
+            var today = DateTime.UtcNow.Date;
+            var horizon = today.AddDays(days);
+            var inventories = await _context.Inventories.AsNoTracking()
+                .Where(i => i.ExpiryDate.HasValue && i.QuantityOnHand > 0)
+                .ToListAsync();
+            var products = await _context.Products.AsNoTracking().ToListAsync();
+            var locations = await _context.Locations.AsNoTracking().ToListAsync();
+
+            return inventories
+                .Select(i =>
+                {
+                    var expiry = i.ExpiryDate!.Value.Date;
+                    var daysLeft = (expiry - today).Days;
+                    return new
+                    {
+                        Product = products.FirstOrDefault(p => p.ProductID == i.ProductID)?.ProductName ?? "Unknown",
+                        SKU = products.FirstOrDefault(p => p.ProductID == i.ProductID)?.SKU ?? "",
+                        Warehouse = locations.FirstOrDefault(l => l.LocationID == i.LocationID)?.WarehouseName ?? "Unknown",
+                        Quantity = i.QuantityOnHand,
+                        ExpiryDate = i.ExpiryDate,
+                        DaysLeft = daysLeft,
+                        Status = daysLeft < 0 ? "Expired" : daysLeft <= 30 ? "Critical" : "Soon"
+                    };
+                })
+                .Where(x => x.DaysLeft <= days)
+                .OrderBy(x => x.DaysLeft)
+                .ToList();
         }
     }
 }

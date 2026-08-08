@@ -1,10 +1,14 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
+using Inventory.Services;
+
 namespace Inventory.Models
 {
-    public class Post
+    public class Post : ITenantScoped
     {
+        public int TenantId { get; set; } = 1;
+
         [Key]
         public int PostID { get; set; }
 

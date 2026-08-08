@@ -1,9 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 
+using Inventory.Services;
+
 namespace Inventory.Models
 {
-    public class Product
+    public class Product : ITenantScoped
     {
+        public int TenantId { get; set; } = 1;
+
         [Key]
         public int ProductID { get; set; }
 
@@ -26,6 +30,9 @@ namespace Inventory.Models
         public decimal UnitPrice { get; set; } // Selling Price
 
         public int? ReorderLevel { get; set; }
+
+        /// <summary>When true, line amounts attract 13% VAT on sales invoices.</summary>
+        public bool IsTaxable { get; set; } = true;
         
         public bool IsActive { get; set; } = true;
     }

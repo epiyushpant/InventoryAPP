@@ -1,4 +1,5 @@
 using Inventory.Models;
+using Inventory.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inventory.Data
@@ -17,7 +18,7 @@ namespace Inventory.Data
             var sales = await _context.Sales.AsNoTracking()
                 .Include(s => s.SaleDetails)
                 .ToListAsync();
-            
+
             foreach (var sale in sales)
             {
                 sale.TotalAmount = await CalculateTotalAmountAsync(sale.SaleID);
@@ -30,7 +31,7 @@ namespace Inventory.Data
             var sale = await _context.Sales.AsNoTracking()
                 .Include(s => s.SaleDetails)
                 .FirstOrDefaultAsync(e => e.SaleID == id);
-            
+
             if (sale != null)
             {
                 sale.TotalAmount = await CalculateTotalAmountAsync(sale.SaleID);
@@ -50,7 +51,9 @@ namespace Inventory.Data
         {
             sale.SaleDate = sale.SaleDate.ToUniversalTime();
 
-            // Calculate totals if details are provided
+            if (string.IsNullOrWhiteSpace(sale.Status))
+                sale.Status = "Draft";
+
             if (sale.SaleDetails != null && sale.SaleDetails.Any())
             {
                 decimal total = 0;
@@ -62,7 +65,6 @@ namespace Inventory.Data
                 sale.TotalAmount = total;
             }
 
-            // Credit Limit Enforcement
             if (sale.CustomerID > 0)
             {
                 var customer = await _context.Customers.FindAsync(sale.CustomerID);
@@ -75,7 +77,8 @@ namespace Inventory.Data
 
                     if (currentOutstanding + sale.TotalAmount > customer.CreditLimit)
                     {
-                        throw new System.InvalidOperationException($"Credit Limit Exceeded! Customer '{customer.FullName}' has a limit of Rs. {customer.CreditLimit}. Current Udharo: Rs. {currentOutstanding}. This sale of Rs. {sale.TotalAmount} will exceed the limit.");
+                        throw new InvalidOperationException(
+                            $"Credit Limit Exceeded! Customer '{customer.FullName}' has a limit of Rs. {customer.CreditLimit}. Current Udharo: Rs. {currentOutstanding}. This sale of Rs. {sale.TotalAmount} will exceed the limit.");
                     }
                 }
             }
@@ -87,86 +90,97 @@ namespace Inventory.Data
 
         public async Task UpdateAsync(Sale sale)
         {
-            // Get the existing sale to check for status change
-            var existingSale = await _context.Sales.AsNoTracking().FirstOrDefaultAsync(s => s.SaleID == sale.SaleID);
-            bool statusChangedToCompleted = existingSale != null && 
-                                           existingSale.Status != "Completed" && 
-                                           sale.Status == "Completed";
+            var existingSale = await _context.Sales.AsNoTracking().FirstOrDefaultAsync(s => s.SaleID == sale.SaleID)
+                ?? throw new InvalidOperationException("Sale not found.");
+
+            DocumentLock.EnsureEditable("Sale", existingSale.Status);
+
+            bool completing =
+                !string.Equals(existingSale.Status, "Completed", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(sale.Status, "Completed", StringComparison.OrdinalIgnoreCase);
 
             sale.SaleDate = sale.SaleDate.ToUniversalTime();
 
-            // Sync Details if provided
-            if (sale.SaleDetails != null)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                var existingDetails = await _context.SaleDetails.Where(d => d.SaleID == sale.SaleID).ToListAsync();
-                _context.SaleDetails.RemoveRange(existingDetails);
-                
-                decimal total = 0;
-                foreach (var detail in sale.SaleDetails)
+                if (sale.SaleDetails != null)
                 {
-                    detail.SaleID = sale.SaleID;
-                    detail.SaleDetailID = 0; // Ensure they are treated as new
-                    detail.LineTotal = (detail.OrderedQuantity * detail.UnitPrice) - detail.Discount;
-                    total += detail.LineTotal;
-                    _context.SaleDetails.Add(detail);
-                }
-                sale.TotalAmount = total;
-            }
+                    var existingDetails = await _context.SaleDetails.Where(d => d.SaleID == sale.SaleID).ToListAsync();
+                    _context.SaleDetails.RemoveRange(existingDetails);
 
-            _context.Sales.Update(sale);
-            await _context.SaveChangesAsync();
-
-            // If status changed to Completed, validate stock and update inventory
-            if (statusChangedToCompleted)
-            {
-                var details = await _context.SaleDetails
-                    .Where(d => d.SaleID == sale.SaleID)
-                    .ToListAsync();
-
-                // 1. Validation Step: Check if enough stock exists for all items
-                foreach (var detail in details)
-                {
-                    if (detail.ProductID != 0)
+                    decimal total = 0;
+                    foreach (var detail in sale.SaleDetails)
                     {
+                        detail.SaleID = sale.SaleID;
+                        detail.SaleDetailID = 0;
+                        detail.LineTotal = (detail.OrderedQuantity * detail.UnitPrice) - detail.Discount;
+                        total += detail.LineTotal;
+                        _context.SaleDetails.Add(detail);
+                    }
+                    sale.TotalAmount = total;
+                }
+
+                if (completing)
+                {
+                    _context.Sales.Update(sale);
+                    await _context.SaveChangesAsync();
+
+                    var details = await _context.SaleDetails.Where(d => d.SaleID == sale.SaleID).ToListAsync();
+                    int locationId = sale.LocationID ?? existingSale.LocationID ?? 1;
+
+                    foreach (var detail in details)
+                    {
+                        if (detail.ProductID == 0) continue;
+
                         var inventory = await _context.Inventories
-                            .FirstOrDefaultAsync(i => i.ProductID == detail.ProductID && i.LocationID == (sale.LocationID ?? 1));
-                        
-                        int currentStock = inventory?.QuantityOnHand ?? 0;
-                        if (currentStock < detail.OrderedQuantity)
+                            .FirstOrDefaultAsync(i => i.ProductID == detail.ProductID && i.LocationID == locationId);
+
+                        int available = inventory?.AvailableQuantity ?? 0;
+                        if (available < detail.OrderedQuantity)
                         {
                             var product = await _context.Products.FindAsync(detail.ProductID);
-                            throw new System.InvalidOperationException($"Insufficient stock for product '{product?.ProductName ?? "Unknown"}'. Available: {currentStock}, Required: {detail.OrderedQuantity}");
+                            throw new InvalidOperationException(
+                                $"Insufficient stock for '{product?.ProductName ?? "Unknown"}'. Available: {available}, Required: {detail.OrderedQuantity}");
                         }
                     }
-                }
 
-                // 2. Execution Step: All items have enough stock, proceed with update
-                foreach (var detail in details)
-                {
-                    if (detail.ProductID != 0)
+                    foreach (var detail in details)
                     {
-                        var inventory = await _context.Inventories
-                            .FirstOrDefaultAsync(i => i.ProductID == detail.ProductID && i.LocationID == (sale.LocationID ?? 1));
+                        if (detail.ProductID == 0) continue;
 
-                        // Inventory is guaranteed to exist and have enough stock because of the validation step above
+                        var inventory = await _context.Inventories
+                            .FirstOrDefaultAsync(i => i.ProductID == detail.ProductID && i.LocationID == locationId);
+
                         inventory!.QuantityOnHand -= detail.OrderedQuantity;
                         inventory.AvailableQuantity -= detail.OrderedQuantity;
                         inventory.LastUpdated = DateTime.UtcNow;
                         _context.Inventories.Update(inventory);
 
-                        // Add stock movement
-                        var movement = new StockMovement
+                        _context.StockMovements.Add(new StockMovement
                         {
                             ProductID = detail.ProductID,
                             MovementType = "Sale",
                             QuantityChange = -detail.OrderedQuantity,
                             MovementDate = DateTime.UtcNow,
                             Reference = $"SALE-{sale.SaleID}"
-                        };
-                        _context.StockMovements.Add(movement);
+                        });
                     }
+
+                    await _context.SaveChangesAsync();
                 }
-                await _context.SaveChangesAsync();
+                else
+                {
+                    _context.Sales.Update(sale);
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
@@ -175,10 +189,7 @@ namespace Inventory.Data
             var entity = await _context.Sales.FindAsync(id);
             if (entity != null)
             {
-                if (entity.Status == "Completed")
-                {
-                    throw new System.InvalidOperationException("Cannot delete a completed sale record. Finalized transactions must be kept for auditing.");
-                }
+                DocumentLock.EnsureDeletable("Sale", entity.Status);
                 _context.Sales.Remove(entity);
                 await _context.SaveChangesAsync();
             }

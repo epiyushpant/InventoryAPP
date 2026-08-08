@@ -36,9 +36,16 @@ namespace Inventory.Controllers
         [HttpPost]
         public async Task<ActionResult<Customer>> CreateCustomer(Customer customer)
         {
-            var newId = await _repo.CreateAsync(customer);
-            customer.CustomerID = newId;
-            return CreatedAtAction(nameof(GetCustomer), new { id = newId }, customer);
+            try
+            {
+                var newId = await _repo.CreateAsync(customer);
+                customer.CustomerID = newId;
+                return CreatedAtAction(nameof(GetCustomer), new { id = newId }, customer);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
@@ -47,8 +54,15 @@ namespace Inventory.Controllers
             if (id != customer.CustomerID)
                 return BadRequest();
 
-            await _repo.UpdateAsync(customer);
-            return NoContent();
+            try
+            {
+                await _repo.UpdateAsync(customer);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]

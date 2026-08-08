@@ -1,4 +1,5 @@
 using Inventory.Models;
+using Inventory.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inventory.Data
@@ -36,9 +37,11 @@ namespace Inventory.Data
                     var inventory = await _context.Inventories
                         .FirstOrDefaultAsync(i => i.ProductID == note.ProductID && i.LocationID == locationId);
 
-                    if (inventory == null || inventory.QuantityOnHand < note.ShippedQuantity)
+                    int available = inventory?.AvailableQuantity ?? 0;
+                    if (inventory == null || available < note.ShippedQuantity)
                     {
-                        throw new InvalidOperationException("Insufficient stock in the warehouse to fulfill this delivery.");
+                        throw new InvalidOperationException(
+                            $"Insufficient available stock to fulfill this delivery. Available: {available}, Required: {note.ShippedQuantity}.");
                     }
 
                     inventory.QuantityOnHand -= note.ShippedQuantity;
@@ -72,19 +75,14 @@ namespace Inventory.Data
 
         public async Task UpdateAsync(DeliveryNote note)
         {
-            note.ShipmentDate = note.ShipmentDate.ToUniversalTime();
-            _context.DeliveryNotes.Update(note);
-            await _context.SaveChangesAsync();
+            DocumentLock.EnsurePostedImmutable("DeliveryNote");
+            await Task.CompletedTask;
         }
 
         public async Task DeleteAsync(int id)
         {
-            var entity = await _context.DeliveryNotes.FindAsync(id);
-            if (entity != null)
-            {
-                _context.DeliveryNotes.Remove(entity);
-                await _context.SaveChangesAsync();
-            }
+            DocumentLock.EnsurePostedImmutable("DeliveryNote");
+            await Task.CompletedTask;
         }
     }
 }

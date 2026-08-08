@@ -1,6 +1,6 @@
 using Inventory.Models;
+using Inventory.Services;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace Inventory.Data
 {
@@ -18,13 +18,12 @@ namespace Inventory.Data
             var orders = await _context.PurchaseOrders.AsNoTracking()
                 .Include(po => po.PurchaseOrderDetails)
                 .ToListAsync();
-            
-            // Calculate total amount for each order based on details
+
             foreach (var order in orders)
             {
                 order.TotalAmount = await CalculateTotalAmountAsync(order.PurchaseOrderID);
             }
-            
+
             return orders;
         }
 
@@ -33,7 +32,7 @@ namespace Inventory.Data
             var order = await _context.PurchaseOrders.AsNoTracking()
                 .Include(po => po.PurchaseOrderDetails)
                 .FirstOrDefaultAsync(e => e.PurchaseOrderID == id);
-            
+
             if (order != null)
             {
                 order.TotalAmount = await CalculateTotalAmountAsync(id);
@@ -46,7 +45,7 @@ namespace Inventory.Data
             var total = await _context.PurchaseOrderDetails
                 .Where(d => d.PurchaseOrderID == purchaseOrderId)
                 .SumAsync(d => d.OrderedQuantity * d.UnitPrice);
-            
+
             return total;
         }
 
@@ -55,7 +54,6 @@ namespace Inventory.Data
             purchaseorder.OrderDate = purchaseorder.OrderDate.ToUniversalTime();
             purchaseorder.ExpectedDeliveryDate = purchaseorder.ExpectedDeliveryDate?.ToUniversalTime();
 
-            // Calculate total amount if details are provided
             if (purchaseorder.PurchaseOrderDetails != null && purchaseorder.PurchaseOrderDetails.Any())
             {
                 decimal total = 0;
@@ -67,6 +65,9 @@ namespace Inventory.Data
                 purchaseorder.TotalAmount = total;
             }
 
+            if (string.IsNullOrWhiteSpace(purchaseorder.Status))
+                purchaseorder.Status = "Draft";
+
             _context.PurchaseOrders.Add(purchaseorder);
             await _context.SaveChangesAsync();
             return purchaseorder.PurchaseOrderID;
@@ -74,26 +75,26 @@ namespace Inventory.Data
 
         public async Task UpdateAsync(PurchaseOrder purchaseorder)
         {
-            // Get the existing order to check for status change
-            var existingOrder = await _context.PurchaseOrders.AsNoTracking().FirstOrDefaultAsync(po => po.PurchaseOrderID == purchaseorder.PurchaseOrderID);
-            bool statusChangedToCompleted = existingOrder != null && 
-                                           existingOrder.Status != "Completed" && 
-                                           purchaseorder.Status == "Completed";
+            var existingOrder = await _context.PurchaseOrders.AsNoTracking()
+                .FirstOrDefaultAsync(po => po.PurchaseOrderID == purchaseorder.PurchaseOrderID)
+                ?? throw new InvalidOperationException("Purchase order not found.");
+
+            DocumentLock.EnsureEditable("PurchaseOrder", existingOrder.Status);
 
             purchaseorder.OrderDate = purchaseorder.OrderDate.ToUniversalTime();
             purchaseorder.ExpectedDeliveryDate = purchaseorder.ExpectedDeliveryDate?.ToUniversalTime();
 
-            // Sync Details if provided
             if (purchaseorder.PurchaseOrderDetails != null)
             {
-                var existingDetails = await _context.PurchaseOrderDetails.Where(d => d.PurchaseOrderID == purchaseorder.PurchaseOrderID).ToListAsync();
+                var existingDetails = await _context.PurchaseOrderDetails
+                    .Where(d => d.PurchaseOrderID == purchaseorder.PurchaseOrderID).ToListAsync();
                 _context.PurchaseOrderDetails.RemoveRange(existingDetails);
-                
+
                 decimal total = 0;
                 foreach (var detail in purchaseorder.PurchaseOrderDetails)
                 {
                     detail.PurchaseOrderID = purchaseorder.PurchaseOrderID;
-                    detail.PODetailID = 0; // Ensure they are treated as new
+                    detail.PODetailID = 0;
                     detail.LineTotal = detail.OrderedQuantity * detail.UnitPrice;
                     total += detail.LineTotal;
                     _context.PurchaseOrderDetails.Add(detail);
@@ -110,10 +111,7 @@ namespace Inventory.Data
             var entity = await _context.PurchaseOrders.FindAsync(id);
             if (entity != null)
             {
-                if (entity.Status == "Completed")
-                {
-                    throw new InvalidOperationException("Cannot delete a completed purchase order. Please cancel it first or keep it for records.");
-                }
+                DocumentLock.EnsureDeletable("PurchaseOrder", entity.Status);
                 _context.PurchaseOrders.Remove(entity);
                 await _context.SaveChangesAsync();
             }

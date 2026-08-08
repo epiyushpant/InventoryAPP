@@ -74,6 +74,9 @@ namespace Inventory.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
@@ -118,9 +121,14 @@ namespace Inventory.Migrations
                     b.Property<int?>("ParentCategoryID")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("CategoryID");
 
                     b.HasIndex("ParentCategoryID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -204,7 +212,12 @@ namespace Inventory.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("CustomerID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Customers", (string)null);
                 });
@@ -229,10 +242,15 @@ namespace Inventory.Migrations
                     b.Property<int>("ShippedQuantity")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("TransportDetails")
                         .HasColumnType("text");
 
                     b.HasKey("DeliveryID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("DeliveryNotes", (string)null);
                 });
@@ -292,7 +310,12 @@ namespace Inventory.Migrations
                     b.Property<int>("ReceivedQuantity")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("GRNID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("GRNs", (string)null);
                 });
@@ -326,7 +349,12 @@ namespace Inventory.Migrations
                     b.Property<int>("ReservedQuantity")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("InventoryID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Inventory", (string)null);
                 });
@@ -361,6 +389,9 @@ namespace Inventory.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Type")
                         .HasColumnType("text");
 
@@ -370,6 +401,8 @@ namespace Inventory.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.HasKey("LocationID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Locations", (string)null);
                 });
@@ -420,6 +453,9 @@ namespace Inventory.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -431,6 +467,8 @@ namespace Inventory.Migrations
                     b.HasKey("PostID");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Posts");
                 });
@@ -455,6 +493,9 @@ namespace Inventory.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsTaxable")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("ProductName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -470,6 +511,9 @@ namespace Inventory.Migrations
                     b.Property<int?>("SupplierID")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("UnitOfMeasure")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
@@ -478,6 +522,8 @@ namespace Inventory.Migrations
                         .HasColumnType("numeric");
 
                     b.HasKey("ProductID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Products", (string)null);
                 });
@@ -533,10 +579,15 @@ namespace Inventory.Migrations
                     b.Property<int>("SupplierID")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
 
                     b.HasKey("PurchaseOrderID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("PurchaseOrders", (string)null);
                 });
@@ -561,12 +612,17 @@ namespace Inventory.Migrations
                     b.Property<int>("PurchaseOrderID")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
                     b.HasKey("PODetailID");
 
                     b.HasIndex("PurchaseOrderID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("PurchaseOrderDetails", (string)null);
                 });
@@ -598,9 +654,46 @@ namespace Inventory.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("PRID");
 
+                    b.HasIndex("TenantId");
+
                     b.ToTable("PurchaseRequisitions", (string)null);
+                });
+
+            modelBuilder.Entity("Inventory.Models.RolePermission", b =>
+                {
+                    b.Property<int>("RolePermissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RolePermissionId"));
+
+                    b.Property<bool>("Allowed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RolePermissionId");
+
+                    b.HasIndex("TenantId", "RoleName", "Key")
+                        .IsUnique();
+
+                    b.ToTable("RolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("Inventory.Models.Sale", b =>
@@ -625,10 +718,15 @@ namespace Inventory.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
 
                     b.HasKey("SaleID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Sales", (string)null);
                 });
@@ -656,12 +754,17 @@ namespace Inventory.Migrations
                     b.Property<int>("SaleID")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
                     b.HasKey("SaleDetailID");
 
                     b.HasIndex("SaleID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("SalesDetails", (string)null);
                 });
@@ -680,6 +783,10 @@ namespace Inventory.Migrations
                     b.Property<DateTime>("InvoiceDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("InvoiceNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
                     b.Property<decimal>("NonTaxableAmount")
                         .HasColumnType("numeric");
 
@@ -697,7 +804,12 @@ namespace Inventory.Migrations
                     b.Property<decimal>("TaxableAmount")
                         .HasColumnType("numeric");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("InvoiceID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("SalesInvoices", (string)null);
                 });
@@ -730,7 +842,12 @@ namespace Inventory.Migrations
                     b.Property<string>("Reason")
                         .HasColumnType("text");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("AdjustmentID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("StockAdjustments", (string)null);
                 });
@@ -758,7 +875,12 @@ namespace Inventory.Migrations
                     b.Property<string>("Reference")
                         .HasColumnType("text");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("MovementID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("StockMovements", (string)null);
                 });
@@ -785,6 +907,9 @@ namespace Inventory.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ToLocationID")
                         .HasColumnType("integer");
 
@@ -792,6 +917,8 @@ namespace Inventory.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("TransferID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("StockTransfers", (string)null);
                 });
@@ -843,9 +970,76 @@ namespace Inventory.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("SupplierID");
 
+                    b.HasIndex("TenantId");
+
                     b.ToTable("Suppliers", (string)null);
+                });
+
+            modelBuilder.Entity("Inventory.Models.Tenant", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TenantId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Preset")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.HasKey("TenantId");
+
+                    b.ToTable("Tenants", (string)null);
+                });
+
+            modelBuilder.Entity("Inventory.Models.TenantCapability", b =>
+                {
+                    b.Property<int>("TenantCapabilityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TenantCapabilityId"));
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<bool?>("ReadOnly")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("Required")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TenantCapabilityId");
+
+                    b.HasIndex("TenantId", "Key")
+                        .IsUnique();
+
+                    b.ToTable("TenantCapabilities", (string)null);
                 });
 
             modelBuilder.Entity("Inventory.Models.UnitConversion", b =>
@@ -867,12 +1061,17 @@ namespace Inventory.Migrations
                     b.Property<int>("ProductID")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("ToUnit")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
                     b.HasKey("ConversionID");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("UnitConversions");
                 });
@@ -1069,6 +1268,17 @@ namespace Inventory.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Inventory.Models.RolePermission", b =>
+                {
+                    b.HasOne("Inventory.Models.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("Inventory.Models.SaleDetail", b =>
                 {
                     b.HasOne("Inventory.Models.Sale", null)
@@ -1076,6 +1286,17 @@ namespace Inventory.Migrations
                         .HasForeignKey("SaleID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Inventory.Models.TenantCapability", b =>
+                {
+                    b.HasOne("Inventory.Models.Tenant", "Tenant")
+                        .WithMany("Capabilities")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1137,6 +1358,11 @@ namespace Inventory.Migrations
             modelBuilder.Entity("Inventory.Models.Sale", b =>
                 {
                     b.Navigation("SaleDetails");
+                });
+
+            modelBuilder.Entity("Inventory.Models.Tenant", b =>
+                {
+                    b.Navigation("Capabilities");
                 });
 #pragma warning restore 612, 618
         }

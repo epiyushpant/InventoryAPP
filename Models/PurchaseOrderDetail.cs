@@ -1,9 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 
+using Inventory.Services;
+
 namespace Inventory.Models
 {
-    public class PurchaseOrderDetail
+    public class PurchaseOrderDetail : ITenantScoped
     {
+        public int TenantId { get; set; } = 1;
+
         [Key]
         public int PODetailID { get; set; }
 

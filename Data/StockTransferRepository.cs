@@ -1,4 +1,5 @@
 using Inventory.Models;
+using Inventory.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inventory.Data
@@ -48,8 +49,15 @@ namespace Inventory.Data
 
         public async Task UpdateAsync(StockTransfer transfer)
         {
-            var existing = await _context.StockTransfers.AsNoTracking().FirstOrDefaultAsync(t => t.TransferID == transfer.TransferID);
-            bool statusChangedToCompleted = existing != null && existing.Status != "Completed" && transfer.Status == "Completed";
+            var existing = await _context.StockTransfers.AsNoTracking()
+                .FirstOrDefaultAsync(t => t.TransferID == transfer.TransferID)
+                ?? throw new InvalidOperationException("Stock transfer not found.");
+
+            DocumentLock.EnsureEditable("StockTransfer", existing.Status);
+
+            bool statusChangedToCompleted =
+                !string.Equals(existing.Status, "Completed", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(transfer.Status, "Completed", StringComparison.OrdinalIgnoreCase);
 
             transfer.TransferDate = transfer.TransferDate.ToUniversalTime();
             _context.StockTransfers.Update(transfer);

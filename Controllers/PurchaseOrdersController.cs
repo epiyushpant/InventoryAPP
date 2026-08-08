@@ -1,4 +1,5 @@
 using Inventory.Data;
+using Inventory.Filters;
 using Inventory.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace Inventory.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [RequireCapability("form.purchaseOrders")]
     public class PurchaseOrdersController : ControllerBase
     {
         private readonly PurchaseOrderRepository _repo;
@@ -20,35 +22,45 @@ namespace Inventory.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PurchaseOrder>>> GetPurchaseOrders()
         {
-            var orders = await _repo.GetAllAsync();
-            return Ok(orders);
+            return Ok(await _repo.GetAllAsync());
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PurchaseOrder>> GetPurchaseOrder(int id)
         {
             var order = await _repo.GetByIdAsync(id);
-            if (order == null)
-                return NotFound();
+            if (order == null) return NotFound();
             return Ok(order);
         }
 
         [HttpPost]
         public async Task<ActionResult<PurchaseOrder>> CreatePurchaseOrder(PurchaseOrder order)
         {
-            var newId = await _repo.CreateAsync(order);
-            order.PurchaseOrderID = newId;
-            return CreatedAtAction(nameof(GetPurchaseOrder), new { id = newId }, order);
+            try
+            {
+                var newId = await _repo.CreateAsync(order);
+                order.PurchaseOrderID = newId;
+                return CreatedAtAction(nameof(GetPurchaseOrder), new { id = newId }, order);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePurchaseOrder(int id, PurchaseOrder order)
         {
-            if (id != order.PurchaseOrderID)
-                return BadRequest();
-
-            await _repo.UpdateAsync(order);
-            return NoContent();
+            if (id != order.PurchaseOrderID) return BadRequest();
+            try
+            {
+                await _repo.UpdateAsync(order);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
@@ -59,7 +71,7 @@ namespace Inventory.Controllers
                 await _repo.DeleteAsync(id);
                 return NoContent();
             }
-            catch (System.InvalidOperationException ex)
+            catch (InvalidOperationException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
