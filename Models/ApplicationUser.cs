@@ -12,6 +12,20 @@ namespace Inventory.Models
         public string Role { get; set; } = "User"; // Default to User; Admin, Sales, Inventory, Accountant
         /// <summary>Shop this user belongs to. JWT claim tenant_id.</summary>
         public int TenantId { get; set; } = 1;
+
+        // Profile fields (email + phone come from IdentityUser)
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Bio { get; set; }
+        public string? Country { get; set; }
+        public string? City { get; set; }
+        public string? PostalCode { get; set; }
+        /// <summary>Nepal PAN / VAT number.</summary>
+        public string? TaxId { get; set; }
+        public string? Facebook { get; set; }
+        public string? Twitter { get; set; }
+        public string? Linkedin { get; set; }
+        public string? Instagram { get; set; }
     }
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
